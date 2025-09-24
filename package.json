@@ -1,0 +1,55 @@
+{
+  "name": "finterax-backend",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "engine": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc --build",
+    "start": "node dist/index.js",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only api/index.ts",
+    "knex": "knex --knexfile knexfile.ts",
+    "migrate": "npm run knex migrate:latest",
+    "seed": "npm run knex seed:run"
+  },
+  "keywords": [],
+  "author": "Moch Fauzi Dwi R",
+  "license": "ISC",
+  "description": "Beginner Backend FWG 20",
+  "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
+    "datauri": "^4.1.0",
+    "dotenv": "^17.2.2",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.5.2",
+    "@types/pg": "^8.15.5",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
+    "cross-env": "^10.0.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "nodemon": "^3.1.10",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1"
+  }
+}

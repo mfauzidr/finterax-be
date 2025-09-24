@@ -1,6 +1,6 @@
 node_modules/
 dist/
 public/
-src/database/seeds/data/
+src/database/seeds/master/
 .env
 .env.*

@@ -7,11 +7,8 @@ SEEDERS_DIR = src/database/seeders
 
 # buat migration baru: make migrate-new name=create_users_table
 migrate-new:
-	@if [ -z "$(name)" ]; then \
-		echo "❌ Harus pakai argumen name=<nama_migration>"; \
-		exit 1; \
-	fi; \
-	$(KNEX) migrate:make $(name) --knexfile $(KNEXFILE) --env $(ENV)
+	@powershell -Command "if (-not '$(name)') { Write-Host '❌ Harus pakai argumen name=<nama_migration>'; exit 1 } else { npx knex migrate:make $(name) --knexfile $(KNEXFILE) --env $(ENV) }"
+
 
 # jalankan semua migration
 migrate-up:

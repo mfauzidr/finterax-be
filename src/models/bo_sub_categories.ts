@@ -16,3 +16,8 @@ export interface ISubCategoryQueryParams {
   search?: string;
   category_id?: number;
 }
+
+export interface ISubCategoryRelations {
+  category: string;
+  sub_category: string[];
+}

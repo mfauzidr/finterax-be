@@ -19,7 +19,7 @@ const config: { [key: string]: Knex.Config } = {
       extension: "ts",
     },
     seeds: {
-      directory: path.join(__dirname, "../database/seeders"),
+      directory: path.join(__dirname, "../database/seeds"),
       extension: "ts",
     },
   },

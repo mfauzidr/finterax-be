@@ -1,11 +1,27 @@
-import { ICategory } from "./bo_categories";
-import { ISubCategory } from "./bo_sub_categories";
-import { IProductUnit } from "./bo_units";
+import { IProductUnitBody } from "./bo_product_unit";
 
-export interface Product {
-  id: number;
+export interface IProductBody {
   name: string;
-  category: ICategory;
-  sub_category: ISubCategory;
-  units: IProductUnit[];
+  code: string;
+  category_id: number;
+  sub_category_id: number;
+  units: IProductUnitBody[];
+}
+
+export interface IProducts extends IProductBody {
+  id?: number;
+  uuid: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface IProductParams {
+  uuid: string;
+}
+
+export interface IProductQueryParams {
+  search?: string;
+  code?: string;
+  category_id?: number;
+  sub_category_id?: number;
 }

@@ -3,9 +3,18 @@ import ExcelJS from "exceljs";
 import path from "path";
 
 export async function seed(knex: Knex): Promise<void> {
-  const filePath = path.join(__dirname, "../seeds/Migration_Data_SP7.xlsx");
+  const filePath = path.join(
+    __dirname,
+    "../seeds/master/Migration_Data_SP7.xlsx"
+  );
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(filePath);
+
+  try {
+    await workbook.xlsx.readFile(filePath);
+  } catch (err) {
+    console.error("File Excel tidak ditemukan:", filePath);
+    throw err;
+  }
 
   const sheet = workbook.getWorksheet("PRODUCT");
   if (!sheet) {
@@ -21,14 +30,18 @@ export async function seed(knex: Knex): Promise<void> {
   sheet.eachRow((row, idx) => {
     if (idx === 1) return; // skip header
     const category = row.getCell(4).text.trim();
-    if (category && !categories.find((c) => c.name === category)) {
+    if (
+      category &&
+      !categories.find(
+        (c) => c.name.trim().toUpperCase() === category.toUpperCase()
+      )
+    ) {
       categories.push({ name: category });
     }
   });
 
   await knex("bo_categories").del();
   await knex("bo_categories").insert(categories);
-
   const dbCategories = await knex("bo_categories").select("*");
 
   // =========================
@@ -39,13 +52,17 @@ export async function seed(knex: Knex): Promise<void> {
     if (idx === 1) return;
     const categoryName = row.getCell(4).text.trim();
     const subName = row.getCell(5).text.trim();
-    const category = dbCategories.find((c) => c.name === categoryName);
+    const category = dbCategories.find(
+      (c) => c.name.trim().toUpperCase() === categoryName.toUpperCase()
+    );
 
     if (
       category &&
       subName &&
       !subCategories.find(
-        (sc) => sc.name === subName && sc.category_id === category.id
+        (sc) =>
+          sc.name.trim().toUpperCase() === subName.toUpperCase() &&
+          sc.category_id === category.id
       )
     ) {
       subCategories.push({ name: subName, category_id: category.id });
@@ -54,7 +71,6 @@ export async function seed(knex: Knex): Promise<void> {
 
   await knex("bo_sub_categories").del();
   await knex("bo_sub_categories").insert(subCategories);
-
   const dbSubCategories = await knex("bo_sub_categories").select("*");
 
   // =========================
@@ -64,14 +80,16 @@ export async function seed(knex: Knex): Promise<void> {
   sheet.eachRow((row, idx) => {
     if (idx === 1) return;
     const unit = row.getCell(6).text.trim();
-    if (unit && !units.find((u) => u.name === unit)) {
+    if (
+      unit &&
+      !units.find((u) => u.name.trim().toUpperCase() === unit.toUpperCase())
+    ) {
       units.push({ name: unit });
     }
   });
 
   await knex("bo_units").del();
   await knex("bo_units").insert(units);
-
   const dbUnits = await knex("bo_units").select("*");
 
   // =========================
@@ -83,6 +101,7 @@ export async function seed(knex: Knex): Promise<void> {
     category_id: number | null;
     sub_category_id: number | null;
   }[] = [];
+
   sheet.eachRow((row, idx) => {
     if (idx === 1) return;
     const name = row.getCell(2).text.trim();
@@ -90,10 +109,22 @@ export async function seed(knex: Knex): Promise<void> {
     const categoryName = row.getCell(4).text.trim();
     const subName = row.getCell(5).text.trim();
 
-    if (name && code && !products.find((p) => p.code === code)) {
-      const category = dbCategories.find((c) => c.name === categoryName);
+    if (
+      name &&
+      code &&
+      !products.find(
+        (p) =>
+          p.name.trim().toUpperCase() === name.toUpperCase() &&
+          p.code.trim().toUpperCase() === code.toUpperCase()
+      )
+    ) {
+      const category = dbCategories.find(
+        (c) => c.name.trim().toUpperCase() === categoryName.toUpperCase()
+      );
       const subCategory = dbSubCategories.find(
-        (sc) => sc.name === subName && sc.category_id === category?.id
+        (sc) =>
+          sc.name.trim().toUpperCase() === subName.toUpperCase() &&
+          sc.category_id === category?.id
       );
       products.push({
         name,
@@ -106,7 +137,6 @@ export async function seed(knex: Knex): Promise<void> {
 
   await knex("bo_products").del();
   await knex("bo_products").insert(products);
-
   const dbProducts = await knex("bo_products").select("*");
 
   // =========================
@@ -128,8 +158,12 @@ export async function seed(knex: Knex): Promise<void> {
     const stockOpname = row.getCell(9).text.trim().toUpperCase() === "YES";
     const defaultPurchase = row.getCell(10).text.trim().toUpperCase() === "YES";
 
-    const product = dbProducts.find((p) => p.code === code);
-    const unit = dbUnits.find((u) => u.name === unitName);
+    const product = dbProducts.find(
+      (p) => p.code.trim().toUpperCase() === code.toUpperCase()
+    );
+    const unit = dbUnits.find(
+      (u) => u.name.trim().toUpperCase() === unitName.toUpperCase()
+    );
 
     if (product && unit) {
       productUnits.push({
@@ -139,9 +173,22 @@ export async function seed(knex: Knex): Promise<void> {
         is_stock_opname: stockOpname,
         is_default_purchase: defaultPurchase,
       });
+    } else {
+      console.warn("Skip product unit, lookup gagal:", {
+        code,
+        unitName,
+        productId: product?.id,
+        unitId: unit?.id,
+      });
     }
   });
 
   await knex("bo_product_units").del();
-  await knex("bo_product_units").insert(productUnits);
+  if (productUnits.length) {
+    await knex("bo_product_units").insert(productUnits);
+  }
+
+  console.log(
+    `✅ Seeding selesai. Categories: ${dbCategories.length}, SubCategories: ${dbSubCategories.length}, Units: ${dbUnits.length}, Products: ${dbProducts.length}, ProductUnits: ${productUnits.length}`
+  );
 }

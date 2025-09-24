@@ -1,28 +1,36 @@
 # --- Konfigurasi ---
-KNEX=npm run knex
-MIGRATE=$(KNEX) migrate:latest
-SEED=$(KNEX) seed:run
-ROLLBACK=$(KNEX) migrate:rollback
-MIGRATIONS_DIR=src/db/migrations
+ENV ?= development
+KNEX = npx knex
+KNEXFILE = src/config/knexfile.ts
+MIGRATIONS_DIR = src/database/migrations
+SEEDERS_DIR = src/database/seeders
 
-# Buat migration baru: make migrate-new name=create_users_table
+# buat migration baru: make migrate-new name=create_users_table
 migrate-new:
-	$(KNEX) migrate:make $(name) --knexfile src/config/knexfile.ts --migrations-directory $(MIGRATIONS_DIR)
+	@if [ -z "$(name)" ]; then \
+		echo "❌ Harus pakai argumen name=<nama_migration>"; \
+		exit 1; \
+	fi; \
+	$(KNEX) migrate:make $(name) --knexfile $(KNEXFILE) --env $(ENV)
 
-# Jalankan migration
+# jalankan semua migration
 migrate-up:
-	$(MIGRATE)
+	$(KNEX) migrate:latest --knexfile $(KNEXFILE) --env $(ENV)
 
-# Rollback migration terakhir
+# rollback migration terakhir
 migrate-down:
-	$(ROLLBACK)
+	$(KNEX) migrate:rollback --knexfile $(KNEXFILE) --env $(ENV)
 
-# Jalankan semua seed
+# lihat status migration
+migrate-status:
+	$(KNEX) migrate:status --knexfile $(KNEXFILE) --env $(ENV)
+
+# jalankan semua seeder
 seed:
-	$(SEED)
+	$(KNEX) seed:run --knexfile $(KNEXFILE) --env $(ENV)
 
-# Reset DB: rollback semua lalu migrate ulang + seed
-reset:
-	$(KNEX) migrate:rollback --all
-	$(MIGRATE)
-	$(SEED)
+# reset DB: rollback semua → migrate lagi → seed
+db-reset:
+	$(KNEX) migrate:rollback --all --knexfile $(KNEXFILE) --env $(ENV)
+	$(KNEX) migrate:latest --knexfile $(KNEXFILE) --env $(ENV)
+	$(KNEX) seed:run --knexfile $(KNEXFILE) --env $(ENV)

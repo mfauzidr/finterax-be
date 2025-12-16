@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   findAllCategories,
   insertCategory,
+  setActiveCategoryById,
   updateCategory,
 } from "../repositories/categories.repository";
 import {
@@ -13,6 +14,7 @@ import {
   ICategoryResponse,
   IErrorResponse,
 } from "../../../shared/models/response.model";
+import { parseBoolean } from "../../../shared/helper/parseBoolean";
 
 export const getAllCategories = async (
   req: Request,
@@ -74,14 +76,17 @@ export const createCategory = async (
 };
 
 export const editCategory = async (
-  req: Request<{ id: number }, {}, ICategoryBody>,
+  req: Request<{ id: number }, {}, { name: string }>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
   try {
-    const data: Omit<ICategoryBody, "name"> = { ...req.body };
+    const { name } = req.body;
+    if (name === "") {
+      throw new Error("name_empty");
+    }
 
-    const result = await updateCategory(id, data);
+    const result = await updateCategory(id, name);
     if (result.length === 0) {
       throw new Error("not_found");
     }
@@ -106,6 +111,50 @@ export const editCategory = async (
         message: "Category name cannot be empty",
       });
     }
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const deactiveCategory = async (
+  req: Request<{ id: number }>,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  const { id } = req.params;
+  try {
+    const result = await setActiveCategoryById(id, false);
+
+    return res.status(200).json({
+      success: true,
+      message: "Category deactived",
+      results: result,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const restoreCategory = async (
+  req: Request<{ id: number }>,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  const { id } = req.params;
+  try {
+    const result = await setActiveCategoryById(id, true);
+
+    return res.status(200).json({
+      success: true,
+      message: "Category restored",
+      results: result,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

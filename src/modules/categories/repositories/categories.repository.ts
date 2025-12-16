@@ -17,22 +17,41 @@ export const insertCategory = async (name: string): Promise<ICategory[]> => {
 
 export const updateCategory = async (
   id: number,
-  data: Partial<ICategory>
+  name: string
 ): Promise<ICategory[]> => {
-  const columns: string[] = [];
-  const values: any[] = [id];
-  for (const [key, value] of Object.entries(data)) {
-    values.push(value);
-    columns.push(`"${key}" = $${values.length}`);
-  }
+  const values = [id, name];
+
   const query = `
         UPDATE "bo_categories" 
-        SET ${columns.join(", ")},
+        SET "name" = $2,
         updated_at = now()
         WHERE "id" = $1 
         RETURNING *`;
+  const result: QueryResult<ICategory> = await db.query(query, values);
+  return result.rows;
+};
+
+export const setActiveCategoryById = async (
+  id: number,
+  is_active: boolean
+): Promise<ICategory[]> => {
+  const values = [id, is_active];
+  let deletedAtClause = "";
+
+  if (is_active === true) {
+    deletedAtClause = "null";
+  } else if (is_active === false) {
+    deletedAtClause = "now()";
+  }
+
+  const query = `
+        UPDATE "bo_categories" 
+        SET "is_active" = $2,
+        deleted_at = ${deletedAtClause}
+        WHERE "id" = $1 
+        RETURNING *`;
+
   console.log(query);
-  console.log(values);
   const result: QueryResult<ICategory> = await db.query(query, values);
   return result.rows;
 };

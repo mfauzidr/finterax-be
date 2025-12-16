@@ -5,7 +5,7 @@ dotenv.config();
 import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors, { CorsOptions } from "cors";
-import router from "./src/routes";
+import router from "./src/shared/routes";
 
 const app = express();
 
@@ -34,7 +34,7 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(
     `✅ Server running on port ${PORT} — DB: ${
-      process.env.DB_HOST || "not specified"
+      process.env.DB_NAME || "not specified"
     }`
   );
 });

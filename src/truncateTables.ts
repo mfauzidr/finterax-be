@@ -1,4 +1,4 @@
-import db from "./config/pg";
+import db from "./shared/config/pg";
 
 async function truncateAll() {
   await db.query(`

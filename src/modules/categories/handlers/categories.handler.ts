@@ -1,0 +1,114 @@
+import { Request, Response } from "express";
+import {
+  findAllCategories,
+  insertCategory,
+  updateCategory,
+} from "../repositories/categories.repository";
+import {
+  ICategory,
+  ICategoryBody,
+  ICategoryParams,
+} from "../models/categories.model";
+import {
+  ICategoryResponse,
+  IErrorResponse,
+} from "../../../shared/models/response.model";
+
+export const getAllCategories = async (
+  req: Request,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  try {
+    const category = await findAllCategories();
+    return res.status(200).json({
+      success: true,
+      message: "List all categories",
+      results: category,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const createCategory = async (
+  req: Request<{}, {}, ICategoryBody>,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      throw new Error("no_name_input");
+    }
+
+    const results = await insertCategory(name);
+    return res.status(200).json({
+      success: true,
+      message: "Create category success",
+      results: results,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
+    console.log(err);
+    if (err.message === "no_name_input") {
+      return res.status(400).json({
+        success: false,
+        message: "Category name must be filled",
+      });
+    }
+    if (err.code === "23505") {
+      return res.status(400).json({
+        success: false,
+        message: "Category name has already exist",
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const editCategory = async (
+  req: Request<{ id: number }, {}, ICategoryBody>,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  const { id } = req.params;
+  try {
+    const data: Omit<ICategoryBody, "name"> = { ...req.body };
+
+    const result = await updateCategory(id, data);
+    if (result.length === 0) {
+      throw new Error("not_found");
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Category updated",
+      results: result,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
+    console.log(err);
+
+    if (err.message === "not_found") {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    if (err.message === "name_empty") {
+      return res.status(400).json({
+        success: false,
+        message: "Category name cannot be empty",
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

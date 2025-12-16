@@ -1,7 +1,7 @@
 # --- Konfigurasi ---
 ENV ?= development
 KNEX = npx knex
-KNEXFILE = src/config/knexfile.ts
+KNEXFILE = src/shared/config/knexfile.ts
 MIGRATIONS_DIR = src/database/migrations
 SEEDERS_DIR = src/database/seeders
 

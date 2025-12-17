@@ -1,10 +1,39 @@
 import { QueryResult } from "pg";
 import db from "../../../shared/config/pg";
 import { ICategory } from "../models/categories.model";
+import { ISubCategoryRelations } from "../models/sub_categories.model";
 
 export const findAllCategories = async (): Promise<ICategory[]> => {
-  let query = `SELECT * FROM "bo_categories" WHERE "is_active" = true`;
+  const query = `SELECT * FROM "bo_categories" WHERE "is_active" = true`;
   const result: QueryResult<ICategory> = await db.query(query);
+  return result.rows;
+};
+
+export const findCategoryById = async (id: number): Promise<ICategory[]> => {
+  const values = [id];
+  const query = `SELECT * FROM "bo_categories" WHERE "id" = $1`;
+  const result: QueryResult<ICategory> = await db.query(query, values);
+  return result.rows;
+};
+
+export const findSubByCategoryId = async (
+  id: number
+): Promise<ISubCategoryRelations[]> => {
+  const values = [id];
+
+  const query = `
+  SELECT 
+    "c"."name" as "Kategori",
+    json_agg(sc.name) AS "Sub Kategori"
+  FROM "bo_category_sub_category" "bcs"
+  LEFT JOIN "bo_sub_categories" "sc" ON "bcs"."sub_category_id" = "sc"."id"
+  LEFT JOIN "bo_categories" "c" ON "bcs"."category_id" = "c"."id"
+  WHERE "bcs"."category_id" = $1
+  GROUP BY "c"."name"`;
+  const result: QueryResult<ISubCategoryRelations> = await db.query(
+    query,
+    values
+  );
   return result.rows;
 };
 
@@ -50,8 +79,6 @@ export const setActiveCategoryById = async (
         deleted_at = ${deletedAtClause}
         WHERE "id" = $1 
         RETURNING *`;
-
-  console.log(query);
   const result: QueryResult<ICategory> = await db.query(query, values);
   return result.rows;
 };

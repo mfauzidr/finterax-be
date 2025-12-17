@@ -1,20 +1,18 @@
 import { Request, Response } from "express";
 import {
   findAllCategories,
+  findCategoryById,
+  findSubByCategoryId,
   insertCategory,
   setActiveCategoryById,
   updateCategory,
 } from "../repositories/categories.repository";
-import {
-  ICategory,
-  ICategoryBody,
-  ICategoryParams,
-} from "../models/categories.model";
+import { ICategoryBody } from "../models/categories.model";
 import {
   ICategoryResponse,
+  ICategorySubResponse,
   IErrorResponse,
 } from "../../../shared/models/response.model";
-import { parseBoolean } from "../../../shared/helper/parseBoolean";
 
 export const getAllCategories = async (
   req: Request,
@@ -28,7 +26,81 @@ export const getAllCategories = async (
       results: category,
     });
   } catch (error) {
+    const err = error as IErrorResponse;
     console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getCategoryById = async (
+  req: Request<{ id: number }>,
+  res: Response<ICategoryResponse>
+): Promise<Response> => {
+  const { id } = req.params;
+  try {
+    if (!id) {
+      throw new Error("no_id");
+    }
+
+    const category = await findCategoryById(id);
+    if (category.length < 1) {
+      throw new Error("not_found");
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Category retrieved successfully",
+      results: category,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
+    console.log(err);
+    if (err.message === "no_id") {
+      return res.status(400).json({
+        success: false,
+        message: "Category id must be filled",
+      });
+    }
+    if (err.message === "not_found") {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const getSubByCategoryId = async (
+  req: Request<{ id: number }>,
+  res: Response<ICategorySubResponse>
+): Promise<Response> => {
+  const { id } = req.params;
+  if (!id) {
+    throw new Error("no_id");
+  }
+
+  try {
+    const subCategories = await findSubByCategoryId(id);
+    return res.status(200).json({
+      success: true,
+      message: "List sub categories",
+      results: subCategories,
+    });
+  } catch (error) {
+    const err = error as IErrorResponse;
+    console.log(error);
+    if (err.message === "no_id") {
+      return res.status(400).json({
+        success: false,
+        message: "Id cannot be empty",
+      });
+    }
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -43,7 +115,7 @@ export const createCategory = async (
   try {
     const { name } = req.body;
 
-    if (!name) {
+    if (!name || name === "") {
       throw new Error("no_name_input");
     }
 
@@ -125,6 +197,9 @@ export const deactiveCategory = async (
   const { id } = req.params;
   try {
     const result = await setActiveCategoryById(id, false);
+    if (result.length < 1) {
+      throw new Error("not_found");
+    }
 
     return res.status(200).json({
       success: true,
@@ -133,6 +208,13 @@ export const deactiveCategory = async (
     });
   } catch (error) {
     const err = error as IErrorResponse;
+    console.log(err);
+    if (err.message === "not_found") {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -147,6 +229,9 @@ export const restoreCategory = async (
   const { id } = req.params;
   try {
     const result = await setActiveCategoryById(id, true);
+    if (result.length < 1) {
+      throw new Error("not_found");
+    }
 
     return res.status(200).json({
       success: true,
@@ -155,6 +240,13 @@ export const restoreCategory = async (
     });
   } catch (error) {
     const err = error as IErrorResponse;
+    console.log(err);
+    if (err.message === "not_found") {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

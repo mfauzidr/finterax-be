@@ -18,6 +18,11 @@ export interface ISubCategoryQueryParams {
 }
 
 export interface ISubCategoryRelations {
-  category: string;
-  sub_category: string[];
+  category?: string;
+  sub_category?: string[];
+}
+
+export interface ICategorySubLinkBody {
+  category_id?: number;
+  sub_category_id?: number;
 }

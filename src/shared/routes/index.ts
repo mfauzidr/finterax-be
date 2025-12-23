@@ -1,8 +1,8 @@
 import { Router } from "express";
-import catgoriesModuleRouter from "../../modules/categories";
-import { unitRouter } from "../../modules/units/unit.router";
-import { productsRouter } from "../../modules/products/products.router";
-import { productUnitsRouter } from "../../modules/product_units/product_units.router";
+import catgoriesModuleRouter from "@modules/categories";
+import { unitRouter } from "@modules/units/unit.router";
+import { productsRouter } from "@modules/products/products.router";
+import { productUnitsRouter } from "@modules/product_units/product_units.router";
 
 const router = Router();
 

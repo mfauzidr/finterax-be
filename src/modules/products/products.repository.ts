@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
 import { IProducts } from "./products.model";
-import db from "../../shared/config/pg";
+import db from "@shared/config/pg";
 
 export const findAllProducts = async (): Promise<IProducts[]> => {
   const query = `

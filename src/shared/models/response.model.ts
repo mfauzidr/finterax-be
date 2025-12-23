@@ -1,8 +1,8 @@
-import { ICategory } from "../../modules/categories/models/categories.model";
+import { ICategory } from "@modules/categories/models/categories.model";
 import {
   ISubCategory,
   ISubCategoryRelations,
-} from "../../modules/categories/models/sub_categories.model";
+} from "@modules/categories/models/sub_categories.model";
 
 interface IBasicResponse {
   success?: boolean;

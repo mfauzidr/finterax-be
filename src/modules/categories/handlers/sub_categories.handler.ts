@@ -12,12 +12,12 @@ import {
   ICategorySubResponse,
   IErrorResponse,
   ISubCategoryResponse,
-} from "../../../shared/models/response.model";
+} from "@shared/models/response.model";
 import {
   ICategorySubLinkBody,
   ISubCategoryBody,
 } from "../models/sub_categories.model";
-import db from "../../../shared/config/pg";
+import db from "@shared/config/pg";
 import { findSubByCategoryId } from "../repositories/categories.repository";
 
 export const getAllSubCategories = async (

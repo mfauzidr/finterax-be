@@ -12,7 +12,7 @@ import {
   ICategoryResponse,
   ICategorySubResponse,
   IErrorResponse,
-} from "../../../shared/models/response.model";
+} from "@shared/models/response.model";
 
 export const getAllCategories = async (
   req: Request,

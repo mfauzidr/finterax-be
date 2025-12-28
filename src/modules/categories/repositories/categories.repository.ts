@@ -4,7 +4,7 @@ import { ICategory } from "../models/categories.model";
 import { ISubCategoryRelations } from "../models/sub_categories.model";
 
 export const findAllCategories = async (): Promise<ICategory[]> => {
-  const query = `SELECT * FROM "bo_categories" WHERE "is_active" = true`;
+  const query = `SELECT * FROM "bo_kategories" WHERE "is_active" = true`;
   const result: QueryResult<ICategory> = await db.query(query);
   return result.rows;
 };

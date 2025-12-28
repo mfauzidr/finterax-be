@@ -7,7 +7,7 @@ import {
   restoreCategory,
   getSubByCategoryId,
   getCategoryById,
-} from "../handlers/categories.handler.ts";
+} from "../handlers/categories.handler";
 
 export const categoryRouter = Router();
 

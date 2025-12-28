@@ -6,7 +6,7 @@ dotenv.config();
 import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors, { CorsOptions } from "cors";
-import router from "./src/shared/routes";
+import router from "@shared/routes";
 
 const app = express();
 

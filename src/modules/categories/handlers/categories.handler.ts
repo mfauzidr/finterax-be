@@ -11,28 +11,19 @@ import { ICategoryBody } from "../models/categories.model";
 import {
   ICategoryResponse,
   ICategorySubResponse,
-  IErrorResponse,
 } from "@shared/models/response.model";
+import { AppError } from "@shared/helper/app_error";
 
 export const getAllCategories = async (
   req: Request,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
-  try {
-    const category = await findAllCategories();
-    return res.status(200).json({
-      success: true,
-      message: "List all categories",
-      results: category,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
+  const category = await findAllCategories();
+  return res.status(200).json({
+    success: true,
+    message: "List all categories",
+    results: category,
+  });
 };
 
 export const getCategoryById = async (
@@ -40,40 +31,20 @@ export const getCategoryById = async (
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  try {
-    if (!id) {
-      throw new Error("no_id");
-    }
-
-    const category = await findCategoryById(id);
-    if (category.length < 1) {
-      throw new Error("not_found");
-    }
-    return res.status(200).json({
-      success: true,
-      message: "Category retrieved successfully",
-      results: category,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(err);
-    if (err.message === "no_id") {
-      return res.status(400).json({
-        success: false,
-        message: "Category id must be filled",
-      });
-    }
-    if (err.message === "not_found") {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  if (!id) {
+    throw new AppError("no_id", "Category id must be filled", 400);
   }
+  const categoryId = Number(req.params.id);
+
+  const category = await findCategoryById(categoryId);
+  if (category.length < 1) {
+    throw new AppError("not_found", "Category not found", 404);
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Category retrieved successfully",
+    results: category,
+  });
 };
 
 export const getSubByCategoryId = async (
@@ -82,69 +53,38 @@ export const getSubByCategoryId = async (
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id) {
-    throw new Error("no_id");
+    throw new AppError("no_id", "Sub Category id must be filled", 400);
+  }
+  const categoryId = Number(req.params.id);
+
+  const subCategories = await findSubByCategoryId(categoryId);
+  if (subCategories.length < 1) {
+    throw new AppError("not_found", "Sub Category not found", 404);
   }
 
-  try {
-    const subCategories = await findSubByCategoryId(id);
-    return res.status(200).json({
-      success: true,
-      message: "List sub categories",
-      results: subCategories,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(error);
-    if (err.message === "no_id") {
-      return res.status(400).json({
-        success: false,
-        message: "Id cannot be empty",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    message: "List sub categories",
+    results: subCategories,
+  });
 };
 
 export const createCategory = async (
   req: Request<{}, {}, ICategoryBody>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
-  try {
-    const { name } = req.body;
+  const { name } = req.body;
 
-    if (!name || name === "") {
-      throw new Error("no_name_input");
-    }
-
-    const results = await insertCategory(name);
-    return res.status(200).json({
-      success: true,
-      message: "Create category success",
-      results: results,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(err);
-    if (err.message === "no_name_input") {
-      return res.status(400).json({
-        success: false,
-        message: "Category name must be filled",
-      });
-    }
-    if (err.code === "23505") {
-      return res.status(400).json({
-        success: false,
-        message: "Category name has already exist",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+  if (!name || name === "") {
+    throw new AppError("no_name_input", "Category name cannot be empty", 400);
   }
+
+  const results = await insertCategory(name);
+  return res.status(200).json({
+    success: true,
+    message: "Create category success",
+    results: results,
+  });
 };
 
 export const editCategory = async (
@@ -152,42 +92,25 @@ export const editCategory = async (
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  try {
-    const { name } = req.body;
-    if (name === "") {
-      throw new Error("name_empty");
-    }
-
-    const result = await updateCategory(id, name);
-    if (result.length === 0) {
-      throw new Error("not_found");
-    }
-    return res.status(200).json({
-      success: true,
-      message: "Category updated",
-      results: result,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(err);
-
-    if (err.message === "not_found") {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-    if (err.message === "name_empty") {
-      return res.status(400).json({
-        success: false,
-        message: "Category name cannot be empty",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  const { name } = req.body;
+  if (!id) {
+    throw new AppError("no_id", "Sub Category id must be filled", 400);
   }
+  const categoryId = Number(req.params.id);
+
+  if (name === "") {
+    throw new AppError("name_empty", "Category name cannot be empty", 400);
+  }
+
+  const result = await updateCategory(categoryId, name);
+  if (result.length === 0) {
+    throw new AppError("not_found", "No Category found", 404);
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Category updated",
+    results: result,
+  });
 };
 
 export const deactiveCategory = async (
@@ -195,31 +118,22 @@ export const deactiveCategory = async (
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  try {
-    const result = await setActiveCategoryById(id, false);
-    if (result.length < 1) {
-      throw new Error("not_found");
-    }
 
-    return res.status(200).json({
-      success: true,
-      message: "Category deactived",
-      results: result,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(err);
-    if (err.message === "not_found") {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  if (!id) {
+    throw new AppError("no_id", "Sub Category id must be filled", 400);
   }
+  const categoryId = Number(req.params.id);
+
+  const result = await setActiveCategoryById(categoryId, false);
+  if (result.length < 1) {
+    throw new AppError("not_found", "Category not found", 404);
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Category deactived",
+    results: result,
+  });
 };
 
 export const restoreCategory = async (
@@ -227,29 +141,20 @@ export const restoreCategory = async (
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  try {
-    const result = await setActiveCategoryById(id, true);
-    if (result.length < 1) {
-      throw new Error("not_found");
-    }
 
-    return res.status(200).json({
-      success: true,
-      message: "Category restored",
-      results: result,
-    });
-  } catch (error) {
-    const err = error as IErrorResponse;
-    console.log(err);
-    if (err.message === "not_found") {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+  if (!id) {
+    throw new AppError("no_id", "Sub Category id must be filled", 400);
   }
+  const categoryId = Number(req.params.id);
+
+  const result = await setActiveCategoryById(categoryId, true);
+  if (result.length < 1) {
+    throw new AppError("not_found", "Category not found", 404);
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Category restored",
+    results: result,
+  });
 };

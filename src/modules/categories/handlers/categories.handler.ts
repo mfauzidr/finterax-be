@@ -27,19 +27,24 @@ export const getAllCategories = async (
 };
 
 export const getCategoryById = async (
-  req: Request<{ id: number }>,
+  req: Request<{ id: string }>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  if (!id) {
-    throw new AppError("no_id", "Category id must be filled", 400);
+  if (!id || id === ":id") {
+    throw new AppError("NO_ID", "Id must be provided", 400);
   }
-  const categoryId = Number(req.params.id);
 
-  const category = await findCategoryById(categoryId);
-  if (category.length < 1) {
-    throw new AppError("not_found", "Category not found", 404);
+  const parsedId = Number(id);
+  if (Number.isNaN(id)) {
+    throw new AppError("INVALID_ID", "Id is invalid", 400);
   }
+
+  const category = await findCategoryById(parsedId);
+  if (category.length < 1) {
+    throw new AppError("NOT_FOUND", "Category not found", 404);
+  }
+
   return res.status(200).json({
     success: true,
     message: "Category retrieved successfully",
@@ -48,18 +53,22 @@ export const getCategoryById = async (
 };
 
 export const getSubByCategoryId = async (
-  req: Request<{ id: number }>,
+  req: Request<{ id: string }>,
   res: Response<ICategorySubResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-  if (!id) {
-    throw new AppError("no_id", "Sub Category id must be filled", 400);
+  if (!id || id === ":id") {
+    throw new AppError("NO_ID", "Id must be provided", 400);
   }
-  const categoryId = Number(req.params.id);
 
-  const subCategories = await findSubByCategoryId(categoryId);
+  const parsedId = Number(id);
+  if (Number.isNaN(id)) {
+    throw new AppError("INVALID_ID", "Id is invalid", 400);
+  }
+
+  const subCategories = await findSubByCategoryId(parsedId);
   if (subCategories.length < 1) {
-    throw new AppError("not_found", "Sub Category not found", 404);
+    throw new AppError("NOT_FOUND", "Sub Category not found", 404);
   }
 
   return res.status(200).json({
@@ -75,8 +84,8 @@ export const createCategory = async (
 ): Promise<Response> => {
   const { name } = req.body;
 
-  if (!name || name === "") {
-    throw new AppError("no_name_input", "Category name cannot be empty", 400);
+  if (!name?.trim()) {
+    throw new AppError("NO_NAME", "Category name cannot be empty", 400);
   }
 
   const results = await insertCategory(name);
@@ -88,23 +97,28 @@ export const createCategory = async (
 };
 
 export const editCategory = async (
-  req: Request<{ id: number }, {}, { name: string }>,
+  req: Request<{ id: string }, {}, { name: string }>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
+  if (!id || id === ":id") {
+    throw new AppError("NO_ID", "Id must be provided", 400);
+  }
+
+  if (!req.body.name) {
+    throw new AppError("NO_NAME", "Category name must be provided", 400);
+  }
+
+  const parsedId = Number(id);
+  if (Number.isNaN(id)) {
+    throw new AppError("INVALID_ID", "Id is invalid", 400);
+  }
+
   const { name } = req.body;
-  if (!id) {
-    throw new AppError("no_id", "Sub Category id must be filled", 400);
-  }
-  const categoryId = Number(req.params.id);
 
-  if (name === "") {
-    throw new AppError("name_empty", "Category name cannot be empty", 400);
-  }
-
-  const result = await updateCategory(categoryId, name);
+  const result = await updateCategory(parsedId, name);
   if (result.length === 0) {
-    throw new AppError("not_found", "No Category found", 404);
+    throw new AppError("NOT_FOUND", "No Category found", 404);
   }
   return res.status(200).json({
     success: true,
@@ -113,20 +127,23 @@ export const editCategory = async (
   });
 };
 
-export const deactiveCategory = async (
-  req: Request<{ id: number }>,
+export const deactivateCategory = async (
+  req: Request<{ id: string }>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-
-  if (!id) {
-    throw new AppError("no_id", "Sub Category id must be filled", 400);
+  if (!id || id === ":id") {
+    throw new AppError("NO_ID", "Id must be provided", 400);
   }
-  const categoryId = Number(req.params.id);
 
-  const result = await setActiveCategoryById(categoryId, false);
+  const parsedId = Number(id);
+  if (Number.isNaN(id)) {
+    throw new AppError("INVALID_ID", "Id is invalid", 400);
+  }
+
+  const result = await setActiveCategoryById(parsedId, false);
   if (result.length < 1) {
-    throw new AppError("not_found", "Category not found", 404);
+    throw new AppError("NOT_FOUND", "Category not found", 404);
   }
 
   return res.status(200).json({
@@ -137,19 +154,22 @@ export const deactiveCategory = async (
 };
 
 export const restoreCategory = async (
-  req: Request<{ id: number }>,
+  req: Request<{ id: string }>,
   res: Response<ICategoryResponse>
 ): Promise<Response> => {
   const { id } = req.params;
-
-  if (!id) {
-    throw new AppError("no_id", "Sub Category id must be filled", 400);
+  if (!id || id === ":id") {
+    throw new AppError("NO_ID", "Id must be provided", 400);
   }
-  const categoryId = Number(req.params.id);
 
-  const result = await setActiveCategoryById(categoryId, true);
+  const parsedId = Number(id);
+  if (Number.isNaN(id)) {
+    throw new AppError("INVALID_ID", "Id is invalid", 400);
+  }
+
+  const result = await setActiveCategoryById(parsedId, true);
   if (result.length < 1) {
-    throw new AppError("not_found", "Category not found", 404);
+    throw new AppError("NOT_FOUND", "Category not found", 404);
   }
 
   return res.status(200).json({

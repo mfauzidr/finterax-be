@@ -1,5 +1,6 @@
 import { AppError } from "@shared/helper/app_error";
 import { handlePgError } from "@shared/helper/handle_pg_error";
+import { logger } from "@shared/logger/logger";
 import { NextFunction, Request, Response } from "express";
 
 export const globalErrorHandler = (
@@ -8,7 +9,13 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(err);
+  logger.error({
+    message: err.message,
+    code: err.code,
+    stack: err.stack,
+    path: req.originalUrl,
+    method: req.method,
+  });
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({

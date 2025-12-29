@@ -3,7 +3,8 @@ import catgoriesModuleRouter from "@modules/categories";
 import { unitRouter } from "@modules/units/unit.router";
 import { productsRouter } from "@modules/products/products.router";
 import { productUnitsRouter } from "@modules/product_units/product_units.router";
-import { globalErrorHandler } from "../../middlewares/error.middleware";
+import { globalErrorHandler } from "middlewares/error.middleware";
+import { requestLogger } from "middlewares/request_logger.middleware";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use(`/back-office/product-units`, productUnitsRouter);
 router.use(`/back-office/products`, productsRouter);
 
 router.use(globalErrorHandler);
+router.use(requestLogger);
 
 export default router;

@@ -3,7 +3,7 @@ import {
   createCategory,
   editCategory,
   getAllCategories,
-  deactiveCategory,
+  deactivateCategory,
   restoreCategory,
   getSubByCategoryId,
   getCategoryById,
@@ -16,5 +16,5 @@ categoryRouter.get("/:id", getCategoryById);
 categoryRouter.get("/sub/:id", getSubByCategoryId);
 categoryRouter.post("/", createCategory);
 categoryRouter.patch("/:id", editCategory);
-categoryRouter.patch("/deactive/:id", deactiveCategory);
+categoryRouter.patch("/deactive/:id", deactivateCategory);
 categoryRouter.patch("/restore/:id", restoreCategory);

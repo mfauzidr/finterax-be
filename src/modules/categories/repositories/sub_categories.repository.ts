@@ -1,10 +1,12 @@
-import { QueryResult } from "pg";
+import { Pool, PoolClient, QueryResult } from "pg";
 import db from "@shared/config/pg";
 import {
   ISubCategory,
   ICategorySubLinkBody,
   ISubCategoryRelations,
 } from "../models/sub_categories.model";
+
+type DBClient = Pool | PoolClient;
 
 export const findAllSubCategories = async (): Promise<ISubCategory[]> => {
   const query = `SELECT * FROM "bo_sub_categories" WHERE "is_active" = true`;
@@ -37,6 +39,7 @@ export const findRelationsSubCategories = async (): Promise<
 };
 
 export const insertSubCategory = async (
+  dbClient: DBClient,
   name: string
 ): Promise<ISubCategory[]> => {
   const value = [name];
@@ -46,11 +49,12 @@ export const insertSubCategory = async (
   RETURNING *
   
   `;
-  const result: QueryResult<ISubCategory> = await db.query(query, value);
+  const result: QueryResult<ISubCategory> = await dbClient.query(query, value);
   return result.rows;
 };
 
 export const insertSubCategoryRelations = async (
+  dbClient: DBClient,
   data: ICategorySubLinkBody
 ): Promise<ISubCategoryRelations[]> => {
   const columns: string[] = [];
@@ -80,7 +84,7 @@ export const insertSubCategoryRelations = async (
   WHERE "bcs"."category_id" = (SELECT category_id FROM inserted)
   GROUP BY "c"."name"`;
 
-  const result: QueryResult<ISubCategoryRelations> = await db.query(
+  const result: QueryResult<ISubCategoryRelations> = await dbClient.query(
     query,
     values
   );
@@ -123,7 +127,6 @@ export const setActiveSubById = async (
         WHERE "id" = $1 
         RETURNING *`;
 
-  console.log(query);
   const result: QueryResult<ISubCategory> = await db.query(query, values);
   return result.rows;
 };

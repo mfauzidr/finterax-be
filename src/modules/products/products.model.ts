@@ -13,6 +13,8 @@ export interface IProducts extends IProductBody {
   uuid: string;
   created_at: Date;
   updated_at: Date;
+  is_active: Date;
+  deleted_at: Date;
 }
 
 export interface IProductParams {

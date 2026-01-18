@@ -3,6 +3,7 @@ import {
   ISubCategory,
   ISubCategoryRelations,
 } from "@modules/categories/models/sub_categories.model";
+import { IUnit } from "@modules/units/unit.model";
 
 interface IBasicResponse {
   success?: boolean;
@@ -21,8 +22,8 @@ export interface ISubCategoryResponse extends IBasicResponse {
 export interface ICategorySubResponse extends IBasicResponse {
   results?: ISubCategoryRelations[];
 }
-export interface ICategorySubResponse extends IBasicResponse {
-  results?: ISubCategoryRelations[];
+export interface IUnitResponse extends IBasicResponse {
+  results?: IUnit[];
 }
 
 export interface IErrorResponse {

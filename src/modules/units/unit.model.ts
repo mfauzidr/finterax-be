@@ -13,4 +13,5 @@ export interface IUnitParams {
 export interface IUnitQueryParams {
   id?: number;
   search?: string;
+  is_active?: boolean;
 }

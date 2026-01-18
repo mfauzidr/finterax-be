@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createCategory,
-  editCategory,
+  updateCategory,
   getAllCategories,
   deactivateCategory,
   restoreCategory,
@@ -15,6 +15,6 @@ categoryRouter.get("/", getAllCategories);
 categoryRouter.get("/:id", getCategoryById);
 categoryRouter.get("/sub/:id", getSubByCategoryId);
 categoryRouter.post("/", createCategory);
-categoryRouter.patch("/:id", editCategory);
+categoryRouter.patch("/:id", updateCategory);
 categoryRouter.patch("/deactive/:id", deactivateCategory);
 categoryRouter.patch("/restore/:id", restoreCategory);

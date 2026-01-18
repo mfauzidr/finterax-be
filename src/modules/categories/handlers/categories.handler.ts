@@ -5,7 +5,7 @@ import {
   findSubByCategoryId,
   insertCategory,
   setActiveCategoryById,
-  updateCategory,
+  editCategory,
 } from "../repositories/categories.repository";
 import { ICategoryBody } from "../models/categories.model";
 import {
@@ -16,7 +16,7 @@ import { AppError } from "@shared/helper/app_error";
 
 export const getAllCategories = async (
   req: Request,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const category = await findAllCategories();
   return res.status(200).json({
@@ -28,7 +28,7 @@ export const getAllCategories = async (
 
 export const getCategoryById = async (
   req: Request<{ id: string }>,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id || id === ":id") {
@@ -54,7 +54,7 @@ export const getCategoryById = async (
 
 export const getSubByCategoryId = async (
   req: Request<{ id: string }>,
-  res: Response<ICategorySubResponse>
+  res: Response<ICategorySubResponse>,
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id || id === ":id") {
@@ -80,7 +80,7 @@ export const getSubByCategoryId = async (
 
 export const createCategory = async (
   req: Request<{}, {}, ICategoryBody>,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const { name } = req.body;
 
@@ -96,9 +96,9 @@ export const createCategory = async (
   });
 };
 
-export const editCategory = async (
+export const updateCategory = async (
   req: Request<{ id: string }, {}, { name: string }>,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id || id === ":id") {
@@ -116,7 +116,7 @@ export const editCategory = async (
 
   const { name } = req.body;
 
-  const result = await updateCategory(parsedId, name);
+  const result = await editCategory(parsedId, name);
   if (result.length === 0) {
     throw new AppError("NOT_FOUND", "No Category found", 404);
   }
@@ -129,7 +129,7 @@ export const editCategory = async (
 
 export const deactivateCategory = async (
   req: Request<{ id: string }>,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id || id === ":id") {
@@ -155,7 +155,7 @@ export const deactivateCategory = async (
 
 export const restoreCategory = async (
   req: Request<{ id: string }>,
-  res: Response<ICategoryResponse>
+  res: Response<ICategoryResponse>,
 ): Promise<Response> => {
   const { id } = req.params;
   if (!id || id === ":id") {

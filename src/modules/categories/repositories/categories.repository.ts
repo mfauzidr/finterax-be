@@ -17,7 +17,7 @@ export const findCategoryById = async (id: number): Promise<ICategory[]> => {
 };
 
 export const findSubByCategoryId = async (
-  id: number
+  id: number,
 ): Promise<ISubCategoryRelations[]> => {
   const values = [id];
 
@@ -32,7 +32,7 @@ export const findSubByCategoryId = async (
   GROUP BY "c"."name"`;
   const result: QueryResult<ISubCategoryRelations> = await db.query(
     query,
-    values
+    values,
   );
   return result.rows;
 };
@@ -44,9 +44,9 @@ export const insertCategory = async (name: string): Promise<ICategory[]> => {
   return result.rows;
 };
 
-export const updateCategory = async (
+export const editCategory = async (
   id: number,
-  name: string
+  name: string,
 ): Promise<ICategory[]> => {
   const values = [id, name];
 
@@ -62,7 +62,7 @@ export const updateCategory = async (
 
 export const setActiveCategoryById = async (
   id: number,
-  is_active: boolean
+  is_active: boolean,
 ): Promise<ICategory[]> => {
   const values = [id, is_active];
   let deletedAtClause = "";

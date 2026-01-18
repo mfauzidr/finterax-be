@@ -9,7 +9,8 @@ export const findAllProductUnits = async (): Promise<IProductUnit[]> => {
     u.name AS unit_name,
     pu.conversion_factor,
     pu.is_stock_opname,
-    pu.is_default_purchase
+    pu.is_default_purchase,
+    p.is_active
   FROM bo_product_units pu
   JOIN bo_products p ON p.id = pu.product_id
   JOIN bo_units u ON u.id = pu.unit_id
